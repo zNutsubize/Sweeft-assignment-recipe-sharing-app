@@ -1,0 +1,164 @@
+<div class="recipe-form-container">
+  <mat-toolbar color="primary" class="header-toolbar">
+    <button mat-icon-button (click)="goBack()" matTooltip="Go Back">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="form-title">{{ isEditMode() ? 'Edit Recipe' : 'Add New Recipe' }}</span>
+    <span class="spacer"></span>
+  </mat-toolbar>
+
+  <div class="form-content">
+    <mat-card class="form-card">
+      <form [formGroup]="recipeForm" (ngSubmit)="onSubmit()">
+        <div class="form-section">
+          <h2 class="section-title">Basic Information</h2>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Recipe Title</mat-label>
+            <input matInput formControlName="title" placeholder="Enter recipe title">
+            @if (recipeForm.get('title')?.invalid && recipeForm.get('title')?.touched) {
+              <mat-error>{{ getErrorMessage('title') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea 
+              matInput 
+              formControlName="description" 
+              placeholder="Describe your recipe"
+              rows="3">
+            </textarea>
+            @if (recipeForm.get('description')?.invalid && recipeForm.get('description')?.touched) {
+              <mat-error>{{ getErrorMessage('description') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="full-width" style="margin-top: 8px;">
+            <button type="button" mat-stroked-button (click)="fileInput.click()">
+              <mat-icon>upload</mat-icon>
+              <span style="margin-left: 6px;">Upload Image</span>
+            </button>
+            <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+          </div>
+
+          @if (recipeForm.get('thumbnailImage')?.invalid && recipeForm.get('thumbnailImage')?.touched) {
+            <div style="color: #f44336; font-size: 12px; margin-top: 6px;">
+              {{ getErrorMessage('thumbnailImage') }}
+            </div>
+          }
+
+          @if (recipeForm.get('thumbnailImage')?.value) {
+            <div style="margin-top: 12px;">
+              <img [src]="recipeForm.get('thumbnailImage')?.value" alt="Preview" style="max-width: 100%; max-height: 200px; border-radius: 4px;" />
+            </div>
+          }
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">Ingredients</h2>
+            <button 
+              type="button" 
+              mat-icon-button 
+              color="primary" 
+              (click)="addIngredient()"
+              matTooltip="Add Ingredient">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <div formArrayName="ingredients" class="ingredients-list">
+            @for (ingredient of ingredients.controls; track ingredient; let i = $index) {
+              <div class="ingredient-item">
+                <mat-form-field appearance="outline" class="ingredient-field">
+                  <mat-label>Ingredient {{ i + 1 }}</mat-label>
+                  <input 
+                    matInput 
+                    [formControlName]="i" 
+                    placeholder="e.g., 2 cups flour">
+                  @if (ingredients.at(i).invalid && ingredients.at(i).touched) {
+                    <mat-error>{{ getErrorMessage('ingredients', i) }}</mat-error>
+                  }
+                </mat-form-field>
+                <button 
+                  type="button" 
+                  mat-icon-button 
+                  color="warn" 
+                  (click)="removeIngredient(i)"
+                  [disabled]="ingredients.length === 1"
+                  matTooltip="Remove Ingredient">
+                  <mat-icon>remove</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h2 class="section-title">Instructions</h2>
+            <button 
+              type="button" 
+              mat-icon-button 
+              color="primary" 
+              (click)="addInstruction()"
+              matTooltip="Add Instruction">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <div formArrayName="instructions" class="instructions-list">
+            @for (instruction of instructions.controls; track instruction; let i = $index) {
+              <div class="instruction-item">
+                <div class="instruction-number">{{ i + 1 }}</div>
+                <mat-form-field appearance="outline" class="instruction-field">
+                  <mat-label>Step {{ i + 1 }}</mat-label>
+                  <textarea 
+                    matInput 
+                    [formControlName]="i" 
+                    placeholder="Describe this step in detail"
+                    rows="3">
+                  </textarea>
+                  @if (instructions.at(i).invalid && instructions.at(i).touched) {
+                    <mat-error>{{ getErrorMessage('instructions', i) }}</mat-error>
+                  }
+                </mat-form-field>
+                <button 
+                  type="button" 
+                  mat-icon-button 
+                  color="warn" 
+                  (click)="removeInstruction(i)"
+                  [disabled]="instructions.length === 1"
+                  matTooltip="Remove Instruction">
+                  <mat-icon>remove</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="button" 
+            mat-button 
+            (click)="goBack()"
+            [disabled]="isSubmitting()">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            mat-raised-button 
+            color="primary"
+            [disabled]="recipeForm.invalid || isSubmitting()">
+            @if (isSubmitting()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <span>{{ isEditMode() ? 'Update Recipe' : 'Create Recipe' }}</span>
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card>
+  </div>
+</div>

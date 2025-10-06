@@ -1,0 +1,108 @@
+<div class="recipe-list-container">
+  <mat-toolbar color="primary" class="header-toolbar">
+    <span class="app-title">Recipe Sharing App</span>
+    <span class="spacer"></span>
+    
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search recipes...</mat-label>
+        <input 
+          matInput 
+          [value]="searchQuery()" 
+          (input)="onSearchChange($event)"
+          placeholder="Search by title, description, or ingredients">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <button mat-icon-button [routerLink]="['/favorites']" matTooltip="View Favorites">
+      <mat-icon>favorite</mat-icon>
+    </button>
+    
+    <button mat-raised-button color="accent" [routerLink]="['/add-recipe']">
+      <mat-icon>add</mat-icon>
+      Add Recipe
+    </button>
+  </mat-toolbar>
+
+  @if (recipeService.loading()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading recipes...</p>
+    </div>
+  }
+
+  @if (!recipeService.loading() && filteredRecipes().length === 0) {
+    <div class="no-recipes">
+      <mat-icon class="no-recipes-icon">restaurant_menu</mat-icon>
+      <h2>No recipes found</h2>
+      @if (searchQuery()) {
+        <p>Try adjusting your search terms</p>
+      } @else {
+        <p>Be the first to add a recipe!</p>
+        <button mat-raised-button color="primary" [routerLink]="['/add-recipe']">
+          Add Your First Recipe
+        </button>
+      }
+    </div>
+  }
+
+  @if (!recipeService.loading() && filteredRecipes().length > 0) {
+    <div class="recipes-grid">
+      @for (recipe of filteredRecipes(); track recipe.id) {
+        <mat-card class="recipe-card">
+          <div class="card-image-container">
+            <img 
+              mat-card-image 
+              [src]="getImageUrl(recipe)" 
+              [alt]="recipe.title"
+              class="recipe-image">
+            
+            <button 
+              mat-icon-button 
+              class="favorite-button"
+              (click)="toggleFavorite(recipe)"
+              [class.favorited]="recipe.isFavorite">
+              <mat-icon>{{ recipe.isFavorite ? 'favorite' : 'favorite_border' }}</mat-icon>
+            </button>
+          </div>
+
+          <mat-card-header>
+            <mat-card-title class="recipe-title">{{ recipe.title }}</mat-card-title>
+            <mat-card-subtitle>{{ recipe.description }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="ingredients-preview">
+              <mat-chip-listbox>
+                @for (ingredient of recipe.ingredients.slice(0, 3); track ingredient) {
+                  <mat-chip-option disabled>{{ ingredient }}</mat-chip-option>
+                }
+                @if (recipe.ingredients.length > 3) {
+                  <mat-chip-option disabled>
+                    +{{ recipe.ingredients.length - 3 }} more
+                  </mat-chip-option>
+                }
+              </mat-chip-listbox>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions align="end">
+            <button mat-button [routerLink]="['/recipes', recipe.id]">
+              <mat-icon>visibility</mat-icon>
+              View
+            </button>
+            <button mat-button [routerLink]="['/recipes', recipe.id, 'edit']">
+              <mat-icon>edit</mat-icon>
+              Edit
+            </button>
+            <button mat-button color="warn" (click)="deleteRecipe(recipe)">
+              <mat-icon>delete</mat-icon>
+              Delete
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

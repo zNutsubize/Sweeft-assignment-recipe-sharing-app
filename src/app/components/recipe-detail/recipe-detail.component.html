@@ -1,0 +1,113 @@
+<div class="recipe-detail-container">
+  <mat-toolbar color="primary" class="header-toolbar">
+    <button mat-icon-button (click)="goBack()" matTooltip="Back to Recipes">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="spacer"></span>
+    
+    @if (recipe()) {
+      <button 
+        mat-icon-button 
+        (click)="toggleFavorite()" 
+        [class.favorited]="recipe()!.isFavorite"
+        matTooltip="Toggle Favorite">
+        <mat-icon>{{ recipe()!.isFavorite ? 'favorite' : 'favorite_border' }}</mat-icon>
+      </button>
+      
+      <button 
+        mat-icon-button 
+        [routerLink]="['/recipes', recipe()!.id, 'edit']" 
+        matTooltip="Edit Recipe">
+        <mat-icon>edit</mat-icon>
+      </button>
+      
+      <button 
+        mat-icon-button 
+        (click)="deleteRecipe()" 
+        color="warn"
+        matTooltip="Delete Recipe">
+        <mat-icon>delete</mat-icon>
+      </button>
+    }
+  </mat-toolbar>
+
+  @if (recipeService.loading()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading recipe...</p>
+    </div>
+  }
+
+  @if (!recipeService.loading() && recipe()) {
+    <div class="recipe-content">
+      <div class="recipe-header">
+        <div class="recipe-image-container">
+          <img 
+            [src]="getImageUrl()" 
+            [alt]="recipe()!.title"
+            class="recipe-image">
+        </div>
+        
+        <div class="recipe-info">
+          <h1 class="recipe-title">{{ recipe()!.title }}</h1>
+          <p class="recipe-description">{{ recipe()!.description }}</p>
+          
+          <div class="recipe-meta">
+            <div class="meta-item">
+              <mat-icon>schedule</mat-icon>
+              <span>Created {{ recipe()!.createdAt | date:'medium' }}</span>
+            </div>
+            @if (recipe()!.updatedAt !== recipe()!.createdAt) {
+              <div class="meta-item">
+                <mat-icon>update</mat-icon>
+                <span>Updated {{ recipe()!.updatedAt | date:'medium' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="recipe-details">
+        <mat-card class="ingredients-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>shopping_cart</mat-icon>
+              Ingredients
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              @for (ingredient of recipe()!.ingredients; track ingredient) {
+                <mat-list-item>
+                  <mat-icon matListItemIcon>check_circle</mat-icon>
+                  <span matListItemTitle>{{ ingredient }}</span>
+                </mat-list-item>
+              }
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="instructions-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>menu_book</mat-icon>
+              Instructions
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              @for (instruction of recipe()!.instructions; track instruction; let i = $index) {
+                <mat-list-item>
+                  <div matListItemIcon class="step-number">{{ i + 1 }}</div>
+                  <span matListItemTitle>{{ instruction }}</span>
+                </mat-list-item>
+              }
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

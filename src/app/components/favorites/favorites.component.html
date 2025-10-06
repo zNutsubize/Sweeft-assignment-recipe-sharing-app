@@ -1,0 +1,81 @@
+<div class="favorites-container">
+  <mat-toolbar color="primary" class="header-toolbar">
+    <button mat-icon-button routerLink="/recipes" matTooltip="Back to All Recipes">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="page-title">My Favorite Recipes</span>
+    <span class="spacer"></span>
+    <mat-icon class="favorite-icon">favorite</mat-icon>
+  </mat-toolbar>
+
+
+  
+  @if (recipeService.loading()) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Loading your favorite recipes...</p>
+    </div>
+  }
+
+  @if (!recipeService.loading() && recipeService.favoriteRecipes().length === 0) {
+    <div class="no-favorites">
+      <mat-icon class="no-favorites-icon">favorite_border</mat-icon>
+      <h2>No favorite recipes yet</h2>
+      <p>Start exploring recipes and mark your favorites!</p>
+      <button mat-raised-button color="primary" routerLink="/recipes">
+        <mat-icon>restaurant_menu</mat-icon>
+        Browse Recipes
+      </button>
+    </div>
+  }
+
+  @if (!recipeService.loading() && recipeService.favoriteRecipes().length > 0) {
+    <div class="favorites-grid">
+      @for (recipe of recipeService.favoriteRecipes(); track recipe.id) {
+        <mat-card class="favorite-card">
+          <div class="card-image-container">
+            <img 
+              mat-card-image 
+              [src]="getImageUrl(recipe)" 
+              [alt]="recipe.title"
+              class="recipe-image">
+            
+            <button 
+              mat-icon-button 
+              class="favorite-button favorited"
+              (click)="toggleFavorite(recipe)">
+              <mat-icon>favorite</mat-icon>
+            </button>
+          </div>
+
+          <mat-card-header>
+            <mat-card-title class="recipe-title">{{ recipe.title }}</mat-card-title>
+            <mat-card-subtitle>{{ recipe.description }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="ingredients-preview">
+              <mat-chip-listbox>
+                @for (ingredient of recipe.ingredients.slice(0, 3); track ingredient) {
+                  <mat-chip-option disabled>{{ ingredient }}</mat-chip-option>
+                }
+                @if (recipe.ingredients.length > 3) {
+                  <mat-chip-option disabled>
+                    +{{ recipe.ingredients.length - 3 }} more
+                  </mat-chip-option>
+                }
+              </mat-chip-listbox>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions align="end">
+            <button mat-button [routerLink]="['/recipes', recipe.id]">
+              <mat-icon>visibility</mat-icon>
+              View Recipe
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>
